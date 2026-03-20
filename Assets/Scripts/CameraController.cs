@@ -12,6 +12,11 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float minXRotation = -10f;
     [SerializeField] private float maxXRotation = 70f;
 
+    [SerializeField] private float minDistance = 2f;
+    [SerializeField] private float maxDistance = 10f;
+    [SerializeField] private float zoomSpeed = 2f;
+    private float currentDistance = 9f;
+
     public Vector3 Forward => new Vector3(transform.forward.x, 0, transform.forward.z).normalized;
 
     public enum RotationMode {Full, YOnly, Locked}
@@ -46,6 +51,12 @@ public class CameraController : MonoBehaviour
         }
 
         transform.rotation = Quaternion.Euler(currentXRotation, currentYRotation, 0f);
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        currentDistance -= scroll * zoomSpeed;
+        currentDistance = Mathf.Clamp(currentDistance, minDistance, maxDistance);
+        Camera.main.transform.localPosition = new Vector3(0, Camera.main.transform.localPosition.y, -currentDistance);
+
     }
 
 

@@ -15,7 +15,7 @@ public class BallShot : MonoBehaviour
 
     private Rigidbody rb;
 
-    private enum ShotState { Idle, ChoosingDirection, ChoosingAngle }
+    private enum ShotState { Idle, ChoosingDirection, ChoosingAngle, Moving}
 
     private ShotState state = ShotState.Idle;
 
@@ -59,6 +59,11 @@ public class BallShot : MonoBehaviour
             if (currentAngle >= maxAngle || currentAngle <= 0f)
                 angleDirection *= -1f;
         }
+
+        if (state == ShotState.Moving && rb.velocity.magnitude < 0.1f)
+        {
+            state = ShotState.Idle;
+        }
     }
 
     void HandleInput()
@@ -67,7 +72,6 @@ public class BallShot : MonoBehaviour
         {
             clickTime = Time.time;
             state = ShotState.ChoosingDirection;
-            cameraTransform.SetRotationMode(CameraController.RotationMode.YOnly);
             lineRenderer.enabled = true;
         }
         else if (state == ShotState.ChoosingDirection && Input.GetMouseButtonUp(0))
@@ -75,12 +79,13 @@ public class BallShot : MonoBehaviour
             lockedForce = (Time.time - clickTime) * forceMultiplier;
             lockedDirection = cameraTransform.Forward;
             Debug.Log("Hold duration: " + (Time.time - clickTime) + " | Force: " + lockedForce);
+            cameraTransform.SetRotationMode(CameraController.RotationMode.YOnly);
             state = ShotState.ChoosingAngle;
         }
         else if (state == ShotState.ChoosingAngle && Input.GetMouseButtonDown(0))
         {
             ShootBall();
-            state = ShotState.Idle;
+            state = ShotState.Moving;
             lineRenderer.enabled = false;
             cameraTransform.SetRotationMode(CameraController.RotationMode.Full);
         }
